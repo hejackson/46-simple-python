@@ -1,5 +1,7 @@
 #!/usr/local/bin/python3
 
+import re
+
 
 def max(a, b):
     if a > b:
@@ -211,6 +213,80 @@ def translate2(phrase):
             result_list.append(word.lower())
 
     return ' '.join(result_list)
+
+
+def char_freq(string):
+    freq = {}
+    for c in string:
+        try:
+            freq[c] += 1
+
+        except KeyError:
+            freq[c] = 1
+
+    return freq
+
+
+def rot13(phrase):
+    cipher = {
+        'a': 'n', 'b': 'o', 'c': 'p', 'd': 'q', 'e': 'r', 'f': 's', 'g': 't',
+        'h': 'u', 'i': 'v', 'j': 'w', 'k': 'x', 'l': 'y', 'm': 'z', 'n': 'a',
+        'o': 'b', 'p': 'c', 'q': 'd', 'r': 'e', 's': 'f', 't': 'g', 'u': 'h',
+        'v': 'i', 'w': 'j', 'x': 'k', 'y': 'l', 'z': 'm', 'A': 'N', 'B': 'O',
+        'C': 'P', 'D': 'Q', 'E': 'R', 'F': 'S', 'G': 'T', 'H': 'U', 'I': 'V',
+        'J': 'W', 'K': 'X', 'L': 'Y', 'M': 'Z', 'N': 'A', 'O': 'B', 'P': 'C',
+        'Q': 'D', 'R': 'E', 'S': 'F', 'T': 'G', 'U': 'H', 'V': 'I', 'W': 'J',
+        'X': 'K', 'Y': 'L', 'Z': 'M'
+    }
+
+    decode = ''
+
+    for c in phrase:
+        if c.isalpha():
+            decode += cipher[c]
+        else:
+            decode += c
+
+    return decode
+
+
+def correct(phrase):
+    a = re.sub('\.', ' ', phrase)
+    b = re.sub(' +', ' ', a)
+    return b
+
+
+def endswitch(word):
+    if word[-1].lower() == 'y':
+        return word[:-1] + 'ies'
+
+    elif word[-1].lower() in ['o', 's', 'x', 'z']:
+        return word + 'es'
+
+    elif word[-2:].lower() in ['ch', 'sh']:
+        return word + 'es'
+
+    else:
+        return word + 's'
+
+
+def make_ing_form(word):
+    if word.lower()[-2:] == 'ie':
+        return word[:-2] + 'ying'
+
+    elif word.lower()[-1] == 'e':
+        if word.lower() != 'be' and word.lower()[-2:] != 'ee':
+            return word[:-1] + 'ing'
+        else:
+            return word + 'ing'
+
+    elif word.lower()[-3] not in 'aeiouy':
+        if word.lower()[-2] in 'aeiouy':
+            if word.lower()[-1] not in 'aeiouy':
+                return word + word[-1] + 'ing'
+
+    else:
+        return word + 'ing'
 
 
 if __name__ == '__main__':
