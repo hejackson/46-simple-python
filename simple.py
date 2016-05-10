@@ -1,9 +1,10 @@
 #!/usr/local/bin/python3
 
 import re
+import functools
 
 
-def max(a, b):
+def max_new(a, b):
     if a > b:
         return a
     elif b > a:
@@ -287,6 +288,87 @@ def make_ing_form(word):
 
     else:
         return word + 'ing'
+
+
+def max_in_list2(list):
+    # stolen from http://www.python-course.eu/python3_lambda.php
+    result = functools.reduce(lambda a, b: a if (a > b) else b, list)
+    return result
+
+
+def mapit1(words):
+    list = {}
+    for word in words:
+        try:
+            list[len(word)].append(word)
+        except KeyError:
+            list[len(word)] = [word]
+
+    return list
+
+
+def mapit2(words):
+    return list(map(len, words))
+
+
+def mapit3(words):
+    return [len(x) for x in words]
+
+
+def find_longest_word2(words):
+    return max([len(x) for x in words])
+
+
+def filter_long_words2(words, n):
+    return [x for x in words if len(x) > n]
+
+
+def palindrome3(file):
+    with open(file, 'r') as infile:
+        for text in infile:
+            text = text.strip()
+            if palindrome2(text):
+                print(text)
+
+    print()
+
+
+def semordnilap(file):
+    # create set to keep first word of all semos found
+    # create and populate set for all words in file
+    # walk through each word and add first word of all semos to semos list
+    semos = set()
+    words = set()
+    with open(file, 'r') as infile:
+        for text in infile:
+            text = text.strip()
+            words.add(text)
+
+    for word in words:
+        # is this word already in semos set?
+        if word not in semos and word[::-1] not in semos:
+
+            # is this word and it's reverse in the list of words?
+            if word[::-1] in words:
+                semos.add(word)
+
+    for word in semos:
+        print('{} {}'.format(word, word[::-1]))
+
+
+def char_freq_table(file):
+    letters = {}
+    with open(file, 'r') as infile:
+        for line in infile:
+            line = line.strip()
+            for c in line:
+                if c.isalpha():
+                    try:
+                        letters[c] += 1
+                    except KeyError:
+                        letters[c] = 1
+
+    return letters
 
 
 if __name__ == '__main__':
