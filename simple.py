@@ -4,6 +4,7 @@ import re
 import functools
 import os
 import time
+import random
 
 
 def max_new(a, b):
@@ -433,7 +434,43 @@ def average_word_length(file):
     return length_of_all_words / number_of_words
 
 
+def guess_number():
+    name = input('Hello! What is your name? ')
+    print('Well, {}, I am thinking of a number between 1 and 20.'.format(name))
+    number = random.randint(1, 20)
+    guess = 999
+    number_of_guesses = 0
 
+    while guess != number and number_of_guesses < 10:
+        print('Take a guess.')
+        guess = int(input())
+        number_of_guesses += 1
+        if guess > number:
+            print('Your guess is too high.')
+        elif guess < number:
+            print('Your guess is too low.')
+        else:
+            print('Good job, {}!  You guessed my number in {} guesses!'.
+                  format(name, number_of_guesses))
+            break
+
+
+def anagram(words):
+    word = words[random.randint(0, len(words) - 1)]
+    scramble = ''.join(random.sample(word, len(word)))
+
+    print('Word anagram: {}'.format(scramble))
+
+    guess = ''
+    number_of_guesses = 0
+    while guess != word and number_of_guesses < 10:
+        print('Guess the word!')
+        guess = input()
+        number_of_guesses += 1
+
+        if guess == word:
+            print('Correct!')
+            break
 
 
 if __name__ == '__main__':
