@@ -2,6 +2,8 @@
 
 import re
 import functools
+import os
+import time
 
 
 def max_new(a, b):
@@ -369,6 +371,69 @@ def char_freq_table(file):
                         letters[c] = 1
 
     return letters
+
+
+def speak_ICAO(phrase):
+    d = {'a': 'alfa', 'b': 'bravo', 'c': 'charlie', 'd': 'delta', 'e': 'echo',
+         'f': 'foxtrot', 'g': 'golf', 'h': 'hotel', 'i': 'india',
+         'j': 'juliett', 'k': 'kilo', 'l': 'lima', 'm': 'mike', 'n': 'november',
+         'o': 'oscar', 'p': 'papa', 'q': 'quebec', 'r': 'romeo', 's': 'sierra',
+         't': 'tango', 'u': 'uniform', 'v': 'victor', 'w': 'whiskey',
+         'x': 'x-ray', 'y': 'yankee', 'z': 'zulu'}
+
+    a = .2
+    b = .5
+
+    for c in phrase:
+        if c.isalpha():
+            c = c.lower()
+            os.system('say ' + d[c])
+            time.sleep(a)
+        else:
+            time.sleep(b)
+
+
+def hapax(file):
+    words = {}
+    with open(file, 'r') as infile:
+        for line in infile:
+            line = line.strip()
+            for word in line.split():
+                word = re.sub('[\W_]', '', word)
+                try:
+                    words[word.lower()] += 1
+                except KeyError:
+                    words[word.lower()] = 1
+
+    for word in sorted(words):
+        if words[word] == 1:
+            print(word)
+
+
+def number_lines(file, file2):
+    line_number = 1
+    with open(file, 'r') as infile:
+        with open(file2, 'w') as outfile:
+            for line in infile:
+                outfile.write('{}: {}'.format(line_number, line))
+                line_number += 1
+
+
+def average_word_length(file):
+    number_of_words = 0
+    length_of_all_words = 0
+    with open(file, 'r') as infile:
+        for line in infile:
+            line = line.strip()
+            for word in line.split():
+                word = re.sub('[\W_]', '', word)
+                number_of_words += 1
+                length_of_all_words += len(word)
+
+    return length_of_all_words / number_of_words
+
+
+
 
 
 if __name__ == '__main__':
