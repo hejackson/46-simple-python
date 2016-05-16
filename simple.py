@@ -5,6 +5,10 @@ import functools
 import os
 import time
 import random
+import requests
+import itertools
+import sys
+import bs4
 
 
 def max_new(a, b):
@@ -471,6 +475,199 @@ def anagram(words):
         if guess == word:
             print('Correct!')
             break
+
+
+def lingo(word):
+    guess = ''
+    while guess != word:
+        guess = input('Please enter your {} character guess: '
+                      .format(len(word)))
+        result = ''
+        for x in range(len(guess)):
+            if guess[x].lower() == word[x].lower():
+                result += '[' + guess[x] + ']'
+            elif guess[x].lower() in word.lower():
+                result += '(' + guess[x] + ')'
+            else:
+                result += guess[x]
+
+        print('Clue: {}'.format(result))
+
+
+def sentence_splitter(text):
+    # taken from:
+    # https://github.com/R4meau/46-simple-python-exercises/blob/master/exercises/ex42.py
+
+    # Add newline to sentences ending in period, but not if Mr., Mrs., Dr.
+    # new = re.sub(r'(?<!Mr)(?<!Mrs)(?<!Dr)\.\s([A-Z])', r'.\n\1', text)
+    pattern = re.compile(r"""
+                         (?<!Mr)        # ignore Mr.
+                         (?<!Mrs)       # ignore Mrs.
+                         (?<!Dr)        # ignore Dr.
+                         \.             # match a period, follwed by
+                         \s+            # one or more spaces, followed by
+                         ([A-Z])        # A CAPITAL letter, saving letter
+                         """, re.VERBOSE)
+
+    new = re.sub(pattern, r'.\n\1', text)
+
+    # replace ! or ? with same, followed by newline
+    # -- this next line didn't work, it didn't put the ! or ? back
+    # new = re.sub(r'([!\?])\s+', '\1\n', new)
+    new = re.sub(r'!\s+', '!\n', new)
+    new = re.sub(r'\?\s+', '?\n', new)
+
+    return new
+
+
+def anagram2():
+    url = 'http://www.puzzlers.org/pub/wordlists/unixdict.txt'
+    response = requests.get(url)
+    spinner = itertools.cycle(['-', '/', '|', '\\'])
+
+    results = set()
+    for word in response.text.split():
+        if len(word) < 7:
+            print('{}...'.format(word))
+            for x in itertools.permutations(word, len(word)):
+                sys.stdout.write(next(spinner))
+                sys.stdout.flush()
+                y = ''.join(x)
+                # add newlines to either end of sample 'word' to match
+                # word boundaries present in the response.text output from
+                # the URL.  For example: '\nzombie\n'
+                z = '\n' + y + '\n'
+                if y != word and z in response.text:
+                    results.add(word + ' : ' + y)
+
+                sys.stdout.write('\b')
+
+    print('\n\nDone...\n\n')
+    return results
+
+
+def nested():
+    text = ''
+    length = 2 * random.randint(1, 5)
+    for x in range(length):
+        r = random.randint(0, 1)
+        if r:
+            text += '['
+        else:
+            text += ']'
+
+    open = 0
+    for c in text:
+        if open >= 0:
+            if c == '[':
+                open += 1
+            else:
+                open -= 1
+                if open < 0:
+                    break
+
+    if open != 0:
+        print('{} NOT OK'.format(text))
+    else:
+        print('{} OK'.format(text))
+
+
+def spinit(x):
+    spinner = itertools.cycle(['-', '/', '|', '\\'])
+
+    for i in range(x):
+        sys.stdout.write(next(spinner))
+        sys.stdout.flush()
+        sys.stdout.write('\b')
+
+
+def pokemon():
+    url = "https://en.wikipedia.org/wiki/List_of_Pok%C3%A9mon#List"
+    response = requests.get(url)
+    soup = bs4.BeautifulSoup(response.text, 'html.parser')
+    table = soup.findChildren('table')
+    rows = table[0].findChildren('tr')
+
+    names = []
+
+    for row in rows[1:]:
+        names.append(row.find('a', href=True, title=True).string)
+
+    names = """audino bagon baltoy banette bidoof braviary bronzor carracosta
+    charmeleon cresselia croagunk darmanitan deino emboar emolga exeggcute
+    gabite girafarig gulpin haxorus heatmor heatran ivysaur jellicent jumpluff
+    kangaskhan kricketune landorus ledyba loudred lumineon lunatone machamp
+    magnezone mamoswine nosepass petilil pidgeotto pikachu pinsir poliwrath
+    poochyena porygon2 porygonz registeel relicanth remoraid rufflet sableye
+    scolipede scrafty seaking sealeo silcoon simisear snivy snorlax spoink
+    starly tirtouga trapinch treecko tyrogue vigoroth vulpix wailord wartortle
+    whismur wingull yamask""".split()
+
+    # names = ['dog', 'goldfish', 'gecko', 'hipster', 'ostritch']
+    # names = 'goldfish dog hippopotamus snake elephant tick gecko \
+    #          kangaroo ocelot'.split()
+
+    print(names)
+    perms = itertools.permutations(names, len(names))
+    total = len(names) ** len(names)
+    print('There are {0:,} permutations of names.'
+          .format(total))
+    input('Press [enter | return] to begin...')
+
+    longest = []
+
+
+    def invalid_word(word, names):
+        for name in names:
+            if name[0].lower() == word[-1].lower():
+                return True
+
+        return False
+
+
+    def check_last_and_next(current_word, next_word):
+        if current_word[-1].lower() == next_word[0].lower():
+            return True
+        else:
+            return False
+
+
+    def longest_set(permutation):
+        current_list = []
+        current_word = permutation[0]
+        current_list.append(current_word)
+
+        if current_word in bad_words:
+            return current_list
+
+        for word in permutation[1:]:
+            if current_word in bad_words:
+                return current_list
+
+            if check_last_and_next(current_word, word):
+                current_list.append(word)
+                current_word = word
+
+            else:
+                return current_list
+
+        return current_list
+
+    bad_words = []
+    for name in names:
+        if invalid_word(name, names) is False:
+            bad_words.append(name)
+
+    for p in perms:
+        if p[0] in bad_words:
+            pass
+        else:
+            print(longest)
+            current_set = longest_set(p)
+            if len(current_set) > len(longest):
+                longest = current_set
+
+    print('LONGEST: {} {}'.format(len(longest),longest))
 
 
 if __name__ == '__main__':
